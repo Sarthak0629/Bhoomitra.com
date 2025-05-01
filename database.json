@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bhoomitra Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom right, #d0f0c0, #ffffff);
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 24px;
+    }
+    .container {
+      padding: 20px;
+    }
+    .section {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      margin: 10px auto;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    input, select {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    #weatherInfo {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  🌱 Bhoomitra Dashboard
+</header>
+
+<div class="container">
+
+  <!-- Welcome User -->
+  <div class="section" id="userInfo">
+    <h2>Welcome, <span id="userName">Farmer</span>!</h2>
+  </div>
+
+  <!-- Crop Type Selection -->
+  <div class="section">
+    <h3>Select Crop Type:</h3>
+    <select id="cropType">
+      <option value="">-- Select Crop Type --</option>
+      <option value="Kharif">Kharif</option>
+      <option value="Rabi">Rabi</option>
+      <option value="Zaid">Zaid</option>
+    </select>
+    <button onclick="showCropDetails()">Show Crop Details</button>
+    <div id="cropDetails"></div>
+  </div>
+
+  <!-- Soil Type Selection -->
+  <div class="section">
+    <h3>Select Soil Type:</h3>
+    <select id="soilType">
+      <option value="">-- Select Soil Type --</option>
+      <option value="Red">Red</option>
+      <option value="Black">Black</option>
+      <option value="Brown">Brown</option>
+      <option value="Alluvial">Alluvial</option>
+    </select>
+    <button onclick="showMoisture()">Show Moisture Requirement</button>
+    <div id="moistureDetails"></div>
+  </div>
+
+  <!-- Weather Section -->
+  <div class="section">
+    <h3>Check Live Weather</h3>
+    <form id="weatherForm">
+      <input type="text" id="cityInput" placeholder="Enter City or Village" required>
+      <button type="submit">Get Weather</button>
+    </form>
+    <div id="weatherInfo"></div>
+  </div>
+
+</div>
+
+<script>
+  // Session Check
+  const currentUserMobile = localStorage.getItem('currentUser');
+  if (!currentUserMobile) {
+    alert("Please login first!");
+    window.location.href = "index.html";
+  } else {
+    const users = JSON.parse(localStorage.getItem('users')) || {};
+    if (!users[currentUserMobile] || !users[currentUserMobile].name) {
+      alert("User data not found. Please log in again.");
+      window.location.href = "index.html";
+    } else {
+      document.getElementById('userName').innerText = users[currentUserMobile].name;
+    }
+  }
+
+  // Crop Details
+  function showCropDetails() {
+    const cropType = document.getElementById('cropType').value;
+    let details = "";
+    if (cropType === "Kharif") {
+      details = "🌾 Kharif crops: Rice, Maize, Millet. Sown in June-July and harvested by October.";
+    } else if (cropType === "Rabi") {
+      details = "🌿 Rabi crops: Wheat, Barley, Mustard. Sown in November and harvested in April.";
+    } else if (cropType === "Zaid") {
+      details = "🍉 Zaid crops: Watermelon, Cucumber. Grown between Rabi and Kharif seasons.";
+    } else {
+      details = "Please select a crop type.";
+    }
+    document.getElementById('cropDetails').innerText = details;
+  }
+
+  // Moisture Details
+  function showMoisture() {
+    const soilType = document.getElementById('soilType').value;
+    let moisture = "";
+    if (soilType === "Red") {
+      moisture = "💧 Red Soil: Needs moderate moisture (40%-50%)";
+    } else if (soilType === "Black") {
+      moisture = "💧 Black Soil: Retains high moisture (50%-60%)";
+    } else if (soilType === "Brown") {
+      moisture = "💧 Brown Soil: Needs less moisture (30%-40%)";
+    } else if (soilType === "Alluvial") {
+      moisture = "💧 Alluvial Soil: Ideal moisture (45%-55%)";
+    } else {
+      moisture = "Please select a soil type.";
+    }
+    document.getElementById('moistureDetails').innerText = moisture;
+  }
+
+  // Weather Forecast
+  const apiKey = "YOUR_API_KEY"; // Replace with your actual OpenWeatherMap API key
+  document.getElementById('weatherForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const city = document.getElementById('cityInput').value.trim();
+    if (city) {
+      document.getElementById('weatherInfo').innerHTML = "⏳ Fetching weather data...";
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+      fetch(url)
+        .then(response => {
+          if (!response.ok) throw new Error("City not found");
+          return response.json();
+        })
+        .then(data => {
+          const temp = data.main.temp;
+          const humidity = data.main.humidity;
+          const weather = data.weather[0].description;
+          document.getElementById('weatherInfo').innerHTML = `
+            <h4>Weather in ${city}:</h4>
+            <p>🌡️ Temperature: ${temp}°C</p>
+            <p>💧 Humidity: ${humidity}%</p>
+            <p>🌦️ Condition: ${weather}</p>
+          `;
+        })
+        .catch(error => {
+          document.getElementById('weatherInfo').innerHTML = `<p style="color:red;">Error: ${error.message}</p>`;
+        });
+    }
+  });
+</script>
+
+</body>
+</html>

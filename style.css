@@ -1,0 +1,53 @@
+body.splash {
+    background-image: url('your-background.jpg'); /* Add your image in the folder */
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .splash-content h1 {
+    color: white;
+    font-size: 3rem;
+    text-shadow: 2px 2px 5px black;
+  }
+  
+  body.login-page {
+    background-image: url('your-background.jpg'); /* optional */
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+.login-container {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    width: 300px;
+}
+.login-container h2 {
+    margin-bottom: 20px;
+}
+.login-container input {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+}
+.login-container button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+}
+.login-links {
+    margin-top: 15px;
+}
+#loginMessage {
+    margin-top: 10px;
+    color: red;
+}

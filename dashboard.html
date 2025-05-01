@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bhoomitra Dashboard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom right, #a8e063, #56ab2f);
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    header {
+      background-color: #2e7d32;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 24px;
+      position: relative;
+    }
+    .logout-button {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background-color: #d32f2f;
+      border: none;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 5px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .container {
+      padding: 20px;
+    }
+    .section {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      margin: 10px auto;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 700px;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #388e3c;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    input, select {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    #weatherInfo {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  🌱 Bhoomitra Dashboard
+  <button class="logout-button" onclick="logoutUser()">🚪 Logout</button>
+</header>
+
+<div class="container">
+
+  <!-- Welcome -->
+  <div class="section" id="userInfo">
+    <h2>Welcome, <span id="userName">Farmer</span>!</h2>
+  </div>
+
+  <!-- Farmer Account -->
+  <div class="section">
+    <h3>Farmer Account Details</h3>
+    <input type="text" id="farmerName" placeholder="Enter Name" readonly>
+    <input type="text" id="farmerPhone" placeholder="Enter Phone Number" readonly>
+
+    <label for="waterSupply">Water Supply Type:</label>
+    <select id="waterSupply">
+      <option value="">-- Select Water Supply --</option>
+      <option value="Bore Well">Bore Well</option>
+      <option value="Well">Well</option>
+      <option value="River Water">River Water</option>
+    </select>
+
+    <input type="number" id="area" placeholder="Enter Area (in acres)">
+  </div>
+
+  <!-- Crop Type -->
+  <div class="section">
+    <h3>Select Crop Type:</h3>
+    <select id="cropType" onchange="updateCropOptions()">
+      <option value="">-- Select Season --</option>
+      <option value="Kharif">Kharif</option>
+      <option value="Rabi">Rabi</option>
+      <option value="Zaid">Zaid</option>
+    </select>
+
+    <h3>Select Crop:</h3>
+    <select id="cropName">
+      <option value="">-- Select Crop --</option>
+    </select>
+    <button onclick="showCropDetails()">Show Crop Details</button>
+    <div id="cropDetails"></div>
+  </div>
+
+  <!-- Soil Type -->
+  <div class="section">
+    <h3>Select Soil Type:</h3>
+    <select id="soilType" onchange="showFertilizerRecommendation()">
+      <option value="">-- Select Soil Type --</option>
+      <option value="Red">Red</option>
+      <option value="Black">Black</option>
+      <option value="Brown">Brown</option>
+      <option value="Alluvial">Alluvial</option>
+    </select>
+
+    <h3>Select Growth Stage:</h3>
+    <select id="growthStage">
+      <option value="">-- Select Growth Stage --</option>
+      <option value="Germination">Germination</option>
+      <option value="Seedling">Seedling</option>
+      <option value="Flowering">Flowering</option>
+      <option value="Harvesting">Harvesting</option>
+    </select>
+
+    <button onclick="showMoisture()">Show Moisture Requirement</button>
+    <div id="moistureDetails"></div>
+    <div id="fertilizerDetails"></div>
+    <div id="phDetails"></div>
+  </div>
+
+  <!-- Weather -->
+  <div class="section">
+    <h3>Check Live Weather</h3>
+    <form id="weatherForm">
+      <input type="text" id="cityInput" placeholder="Enter City or Village" required>
+      <button type="submit">Get Weather</button>
+    </form>
+    <div id="weatherInfo"></div>
+  </div>
+
+  <!-- OV2640 Camera Images -->
+  <div class="section">
+    <h3>Field Images (OV2640)</h3>
+    <div id="cameraImages">
+      <p>📷 Latest field images will appear here (placeholder)</p>
+      <!-- You can populate this with actual image URLs from your backend -->
+      <img src="https://via.placeholder.com/400x200?text=Field+Image+1" alt="Image 1" style="width:100%; margin-bottom:10px;">
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Session Check
+  const currentUserMobile = localStorage.getItem('currentUser');
+  if (!currentUserMobile) {
+    alert("Please login first!");
+    window.location.href = "index.html";
+  } else {
+    const users = JSON.parse(localStorage.getItem('users')) || {};
+    const user = users[currentUserMobile];
+    if (user) {
+      document.getElementById('userName').innerText = user.name || "Farmer";
+      document.getElementById('farmerName').value = user.name || "";
+      document.getElementById('farmerPhone').value = currentUserMobile;
+    }
+  }
+
+  function logoutUser() {
+    const confirmLogout = confirm("Are you sure you want to logout?");
+    if (confirmLogout) {
+      localStorage.removeItem('currentUser');
+      alert("You have been logged out successfully!");
+      window.location.href = "index.html";
+    }
+  }
+
+  function updateCropOptions() {
+    const cropType = document.getElementById('cropType').value;
+    const cropNameSelect = document.getElementById('cropName');
+    cropNameSelect.innerHTML = '<option value="">-- Select Crop --</option>';
+    let crops = [];
+
+    if (cropType === "Kharif") crops = ["Rice", "Maize", "Soyabean", "Sugarcane"];
+    else if (cropType === "Rabi") crops = ["Wheat", "Barley", "Mustard", "Gram"];
+    else if (cropType === "Zaid") crops = ["Watermelon", "Cucumber", "Pumpkin"];
+
+    crops.forEach(crop => {
+      const option = document.createElement('option');
+      option.value = crop;
+      option.textContent = crop;
+      cropNameSelect.appendChild(option);
+    });
+  }
+
+  function showCropDetails() {
+    const crop = document.getElementById('cropName').value;
+    let details = "";
+    const info = {
+      "Rice": "🌾 Rice: Needs heavy rainfall. Sown in June.",
+      "Maize": "🌽 Maize: Grows best in well-drained soil with moderate water.",
+      "Soyabean": "🌱 Soyabean: Best in well-drained soil. Sown in June-July.",
+      "Sugarcane": "🍬 Sugarcane: Requires high moisture and warm temperature.",
+      "Wheat": "🌾 Wheat: Needs cool climate. Sown in November.",
+      "Barley": "🌾 Barley: Requires dry and cool climate.",
+      "Mustard": "🌼 Mustard: Prefers loamy soil, grown in winter.",
+      "Gram": "🌿 Gram (Chana): Grows in loamy soil, moderate water.",
+      "Watermelon": "🍉 Watermelon: Warm season crop, sandy soil.",
+      "Cucumber": "🥒 Cucumber: Needs hot weather and sandy loam soil.",
+      "Pumpkin": "🎃 Pumpkin: Requires warm weather and rich soil."
+    };
+    details = info[crop] || "Please select a crop.";
+    document.getElementById('cropDetails').innerText = details;
+  }
+
+  function showMoisture() {
+    const soil = document.getElementById('soilType').value;
+    const stage = document.getElementById('growthStage').value;
+    if (!soil || !stage) {
+      document.getElementById('moistureDetails').innerText = "Please select both soil and growth stage.";
+      return;
+    }
+
+    const base = {
+      "Red": [40, 50], "Black": [50, 60], "Brown": [30, 40], "Alluvial": [45, 55]
+    };
+    const adjust = {
+      "Germination": 10, "Seedling": 5, "Flowering": 0, "Harvesting": -10
+    };
+
+    const [min, max] = base[soil];
+    const adjMin = min + adjust[stage];
+    const adjMax = max + adjust[stage];
+    document.getElementById('moistureDetails').innerText =
+      `💧 For ${soil} soil during ${stage} stage: Ideal moisture = ${adjMin}% - ${adjMax}%`;
+  }
+
+  function showFertilizerRecommendation() {
+    const soil = document.getElementById('soilType').value;
+    if (!soil) return;
+
+    let fertilizer = "", ph = "";
+    switch(soil) {
+      case "Red":
+        fertilizer = "Use NPK 20:20:0 or compost with nitrogen.";
+        ph = "Recommended pH: 6.0 - 6.5";
+        break;
+      case "Black":
+        fertilizer = "Use potassium-rich fertilizer like MOP.";
+        ph = "Recommended pH: 6.5 - 7.5";
+        break;
+      case "Brown":
+        fertilizer = "Apply organic manure or urea.";
+        ph = "Recommended pH: 5.5 - 6.5";
+        break;
+      case "Alluvial":
+        fertilizer = "Use balanced NPK and zinc sulphate.";
+        ph = "Recommended pH: 6.5 - 7.0";
+        break;
+    }
+
+    document.getElementById('fertilizerDetails').innerText = "🌿 Fertilizer Recommendation: " + fertilizer;
+    document.getElementById('phDetails').innerText = "🔬 " + ph;
+  }
+
+  // Weather API
+  const apiKey = "faaa5bc1696d66ddaa8e84fe85ea5e8f";
+  document.getElementById('weatherForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const city = document.getElementById('cityInput').value.trim();
+    if (!city) return;
+
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        const temp = data.main.temp;
+        const humidity = data.main.humidity;
+        const weather = data.weather[0].description;
+        document.getElementById('weatherInfo').innerHTML = `
+          <h4>Weather in ${city}:</h4>
+          <p>🌡️ Temperature: ${temp}°C</p>
+          <p>💧 Humidity: ${humidity}%</p>
+          <p>🌦️ Condition: ${weather}</p>
+        `;
+      })
+      .catch(err => {
+        document.getElementById('weatherInfo').innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
+      });
+  });
+</script>
+
+</body>
+</html>

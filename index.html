@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bhoomitra - EMPOWERING FARMER WITH TW </title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1600596541417-190ac0e4c244?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+      background-size: cover;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      text-align: center;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
+      width: 300px;
+      transition: 0.5s ease;
+    }
+    h1, h2 {
+      color: #2C3E50;
+    }
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+    }
+    button {
+      
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 10px 5px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #219150;
+    }
+    #login, #signup, #forgot {
+      display: none;
+    }
+    #message {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body style="background-image: url('https://thumbs.dreamstime.com/b/witness-beauty-sustainable-agriculture-sunset-captivating-silhouette-photograph-showcases-drip-irrigation-system-362266863.jpg');">
+
+  <div class="container" id="welcome" style="background-image: url('https://media.istockphoto.com/id/1272651366/vector/farm-landscape-vector-illustration-with-green-meadow-field-tractor-and-animal-cow-horse.jpg?s=612x612&w=0&k=20&c=FrtihFxRhHzcWxNSytdZ1iyHstGFk5OIKINDU2y9phM=');" >
+    
+    <h1>Welcome to Bhoomitra</h1>
+  </div>
+
+  <div class="container" id="login">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <input type="text" id="loginMobile" placeholder="Mobile Number" required><br>
+      <input type="password" id="loginPassword" placeholder="Password" required><br>
+      <button type="submit">Login</button>
+    </form>
+    <button onclick="showSignup()">Sign Up</button>
+    <button onclick="showForgot()">Forgot Password?</button>
+    <p id="loginMessage"></p>
+  </div>
+
+  <div class="container" id="signup">
+    <h2>Sign Up</h2>
+    <form id="signupForm">
+      <input type="text" id="signupName" placeholder="Name" required><br>
+      <input type="text" id="signupMobile" placeholder="Mobile Number" required><br>
+      <input type="password" id="signupPassword" placeholder="Password" required><br>
+      <input type="password" id="signupConfirmPassword" placeholder="Confirm Password" required><br>
+      <button type="submit">Sign Up</button>
+    </form>
+    <button onclick="showLogin()">Back to Login</button>
+    <p id="signupMessage"></p>
+  </div>
+
+  <div class="container" id="forgot">
+    <h2>Forgot Password</h2>
+    <form id="forgotForm">
+      <input type="text" id="forgotMobile" placeholder="Mobile Number" required><br>
+      <input type="password" id="forgotPassword" placeholder="New Password" required><br>
+      <input type="password" id="forgotConfirmPassword" placeholder="Confirm New Password" required><br>
+      <button type="submit">Reset Password</button>
+    </form>
+    <button onclick="showLogin()">Back to Login</button>
+    <p id="forgotMessage"></p>
+  </div>
+
+<script>
+  // Automatically check if user already logged in
+  window.onload = () => {
+    const currentUser = localStorage.getItem('currentUser');
+    if (currentUser) {
+      alert('Welcome back!');
+      window.location.href = 'dashboard.html'; // You can create dashboard.html
+    }
+  };
+
+  // Show pages
+  setTimeout(() => {
+    document.getElementById('welcome').style.display = 'none';
+    document.getElementById('login').style.display = 'block';
+  }, 2000);
+
+  function showSignup() {
+    hideAll();
+    document.getElementById('signup').style.display = 'block';
+  }
+
+  function showLogin() {
+    hideAll();
+    document.getElementById('login').style.display = 'block';
+  }
+
+  function showForgot() {
+    hideAll();
+    document.getElementById('forgot').style.display = 'block';
+  }
+
+  function hideAll() {
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('signup').style.display = 'none';
+    document.getElementById('forgot').style.display = 'none';
+  }
+
+  // Sign up
+  document.getElementById('signupForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const name = document.getElementById('signupName').value.trim();
+    const mobile = document.getElementById('signupMobile').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    const confirmPassword = document.getElementById('signupConfirmPassword').value;
+
+    if (password !== confirmPassword) {
+      document.getElementById('signupMessage').innerText = 'Passwords do not match!';
+      return;
+    }
+
+    let users = JSON.parse(localStorage.getItem('users')) || {};
+    if (users[mobile]) {
+      document.getElementById('signupMessage').innerText = 'Mobile already registered.';
+      return;
+    }
+    users[mobile] = { name, password };
+    localStorage.setItem('users', JSON.stringify(users));
+    document.getElementById('signupMessage').innerText = 'Signup successful!';
+    
+    setTimeout(showLogin, 1000);
+  });
+
+  // Login
+  document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const mobile = document.getElementById('loginMobile').value.trim();
+    const password = document.getElementById('loginPassword').value;
+
+    let users = JSON.parse(localStorage.getItem('users')) || {};
+    if (users[mobile] && users[mobile].password === password) {
+      localStorage.setItem('currentUser', mobile);
+      alert('Login successful!');
+      window.location.href = 'dashboard.html'; // Redirect after login
+    } else {
+      document.getElementById('loginMessage').innerText = 'Incorrect credentials!';
+    }
+  });
+
+  // Forgot Password
+  document.getElementById('forgotForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const mobile = document.getElementById('forgotMobile').value.trim();
+    const password = document.getElementById('forgotPassword').value;
+    const confirmPassword = document.getElementById('forgotConfirmPassword').value;
+
+    if (password !== confirmPassword) {
+      document.getElementById('forgotMessage').innerText = 'Passwords do not match!';
+      return;
+    }
+
+    let users = JSON.parse(localStorage.getItem('users')) || {};
+    if (users[mobile]) {
+      users[mobile].password = password;
+      localStorage.setItem('users', JSON.stringify(users));
+      document.getElementById('forgotMessage').innerText = 'Password reset successful!';
+      setTimeout(showLogin, 1000);
+    } else {
+      document.getElementById('forgotMessage').innerText = 'Mobile not found!';
+    }
+  });
+</script>
+
+</body>
+</html>
